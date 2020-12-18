@@ -40,7 +40,7 @@ using namespace pybind11::literals;
 using sofa::simulation::Simulation;
 
 #include <sofa/core/visual/VisualParams.h>
-#include "Submodule_Simulation_doc.h"
+#include <SofaPython3/Sofa/Simulation/Submodule_Simulation_doc.h>
 
 #include <sofa/core/init.h>
 #include <sofa/simulation/init.h>

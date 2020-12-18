@@ -28,20 +28,22 @@ along with sofaqtquick. If not, see <http://www.gnu.org/licenses/>.
 #include <pybind11/pybind11.h>
 #include <pybind11/cast.h>
 
-#include "Binding_Controller.h"
-#include "Binding_Controller_doc.h"
+#include <SofaPython3/Sofa/Core/Binding_Base.h>
+#include <SofaPython3/Sofa/Core/Binding_Controller.h>
+#include <SofaPython3/Sofa/Core/Binding_Controller_doc.h>
 
-#include <SofaPython3/DataHelper.h>
 #include <SofaPython3/PythonFactory.h>
 #include <SofaPython3/PythonEnvironment.h>
-using sofapython3::PythonEnvironment;
 
-PYBIND11_DECLARE_HOLDER_TYPE(Controller,
-                             sofapython3::py_shared_ptr<Controller>, true)
+/// Bind the python's attribute error
+namespace pybind11 { PYBIND11_RUNTIME_EXCEPTION(attribute_error, PyExc_AttributeError) }
+/// Makes an alias for the pybind11 namespace to increase readability.
+namespace py { using namespace pybind11; }
 
 namespace sofapython3
 {
     using sofa::core::objectmodel::Event;
+    using sofa::core::objectmodel::BaseObject;
 
     void Controller_Trampoline::init()
     {
@@ -96,9 +98,16 @@ namespace sofapython3
                                              py::dynamic_attr(),
                                              sofapython3::doc::controller::Controller);
 
+        PythonFactory::registerType<Controller_Trampoline>(
+                [](sofa::core::objectmodel::Base* object)
+                {
+                    auto controller = dynamic_cast<Controller_Trampoline *>(object);
+                    return py::cast(py_shared_ptr<Controller_Trampoline>(controller));
+                });
+
         f.def(py::init([](py::args& /*args*/, py::kwargs& kwargs)
         {
-            auto c = new Controller_Trampoline();
+            auto c = sofa::core::sptr<Controller_Trampoline> (new Controller_Trampoline());
             c->f_listening.setValue(true);
 
             for(auto kv : kwargs)

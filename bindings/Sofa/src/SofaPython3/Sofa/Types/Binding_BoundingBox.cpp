@@ -25,15 +25,17 @@ along with sofaqtquick. If not, see <http://www.gnu.org/licenses/>.
     - thierry.gaugry@inria.fr
 ********************************************************************/
 
-#include "Binding_BoundingBox.h"
+#include <SofaPython3/Sofa/Types/Binding_BoundingBox.h>
 
-#include <SofaPython3/Sofa/Core/Binding_BaseData.h>
-
+#include <sofa/core/objectmodel/BaseData.h>
 #include <sofa/core/objectmodel/Data.h>
 #include <sofa/defaulttype/BoundingBox.h>
 #include <SofaPython3/PythonFactory.h>
 
 using sofa::defaulttype::BoundingBox;
+using sofa::core::objectmodel::BaseData;
+
+namespace py { using namespace pybind11; }
 
 namespace sofapython3 {
 
