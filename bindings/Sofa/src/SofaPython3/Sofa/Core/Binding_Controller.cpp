@@ -98,13 +98,6 @@ namespace sofapython3
                                              py::dynamic_attr(),
                                              sofapython3::doc::controller::Controller);
 
-        PythonFactory::registerType<Controller_Trampoline>(
-                [](sofa::core::objectmodel::Base* object)
-                {
-                    auto controller = dynamic_cast<Controller_Trampoline *>(object);
-                    return py::cast(py_shared_ptr<Controller_Trampoline>(controller));
-                });
-
         f.def(py::init([](py::args& /*args*/, py::kwargs& kwargs)
         {
             auto c = sofa::core::sptr<Controller_Trampoline> (new Controller_Trampoline());

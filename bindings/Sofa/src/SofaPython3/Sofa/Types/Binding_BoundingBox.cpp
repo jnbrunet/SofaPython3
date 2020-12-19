@@ -82,7 +82,11 @@ void moduleAddBoundingBox(py::module& m)
     }, "returns the center of the bbox");
 
     PythonFactory::registerType("BoundingBox", [](BaseData* data) -> py::object {
-        return py::cast(dynamic_cast<sofa::Data<BoundingBox>*>(data));
+        // Weird bug here, using a dynamic_cast will fail to convert the BaseData to a Data<BoundingBox> on MacOS and
+        // MSVC, even if the type is good. We therefore use in reinterpret_cast to force it until we understand why
+        // the initial cast fails.
+        auto bbox = reinterpret_cast<sofa::Data<BoundingBox>*>(data);
+        return py::cast(bbox);
     });
 
 }

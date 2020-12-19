@@ -74,7 +74,7 @@ void moduleAddNodeIterator(py::module &m)
 
     d.def("at", [](NodeIterator& d, size_t index) -> py::object
     {
-        return py::cast(d.get(d.owner.get(), index));
+        return PythonFactory::toPython(d.get(d.owner.get(), index).get());
     });
     d.def("remove_at", [](NodeIterator& d, size_t index)
     {
