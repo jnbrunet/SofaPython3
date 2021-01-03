@@ -1,0 +1,83 @@
+name: CI
+
+on: pull_request
+
+jobs:
+  build:
+    name: Building on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-2019]
+    env:
+      TOKEN: ${{ secrets.SOFA_REPO_READ_TOKEN }}
+      SOFA_ROOT: ${{ github.workspace }}/sofa
+      EIGEN_ROOT: ${{ github.workspace }}/eigen
+      PYBIND11_ROOT: ${{ github.workspace }}/pybind11
+
+    steps:
+      - name: Setup PATH
+        shell: bash
+        run: |
+          echo $SOFA_ROOT  >> $GITHUB_PATH
+          echo $EIGEN_ROOT >> $GITHUB_PATH
+          echo $PYBIND11_ROOT >> $GITHUB_PATH
+          echo $BOOST_ROOT_1_72_0 >> $GITHUB_PATH
+
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: Cache dependencies
+        id: cache-dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ github.workspace }}/eigen
+            ${{ github.workspace }}/pybind11
+          key: ${{ runner.os }}-dependencies
+
+      - name: Install Eigen 3
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          export BOOST_ROOT=$BOOST_ROOT_1_72_0
+          export PATH="$BOOST_ROOT;$PATH"
+          git clone --depth 1 -b 3.3 https://gitlab.com/libeigen/eigen.git eigen3_src
+          cd eigen3_src && mkdir build && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=$EIGEN_ROOT ..
+          cmake --build . --target install --config Release
+
+      - name: Install pybind11
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          git clone --depth 1 https://github.com/pybind/pybind11.git pybind11_src
+          cd pybind11_src && mkdir build && cd build
+          cmake -DPYBIND11_TEST=OFF -DCMAKE_INSTALL_PREFIX=$PYBIND11_ROOT ..
+          cmake --build . --target install --config Release
+
+
+      - name: Download SOFA nightly build
+        shell: pwsh
+        run: |
+          curl --output sofa.zip -L https://ci.inria.fr/sofa-ci-dev/job/nightly-generate-binaries-v20.12/lastSuccessfulBuild/CI_SCOPE=binaries_minimal/artifact/Windows/*zip*/Windows.zip
+
+      - name: Install SOFA nightly build
+        shell: bash
+        run: |
+          echo "Installing in $SOFA_ROOT"
+          unzip sofa.zip -d temp
+          unzip temp/Windows/`ls temp/Windows/` -d temp
+          rm -rf temp/Windows
+          mv temp/`ls temp` ${SOFA_ROOT}
+          rm -rf temp
+
+      - name: Build
+        run: |
+          cmake -G "Visual Studio 16 2019" -A x64 .
+          make --build . --config Release
