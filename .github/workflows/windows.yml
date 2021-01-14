@@ -84,4 +84,4 @@ jobs:
         shell: bash
         run: |
           cmake -G "Visual Studio 16 2019" -A x64 -S $SP3_SRC -B "$SP3_SRC/build"
-          make --build "$SP3_SRC/build" --config Release
+          cmake --build "$SP3_SRC/build" --config Release
