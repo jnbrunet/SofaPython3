@@ -14,6 +14,7 @@ jobs:
       SOFA_ROOT: ${{ github.workspace }}/sofa
       EIGEN_ROOT: ${{ github.workspace }}/eigen
       PYBIND11_ROOT: ${{ github.workspace }}/pybind11
+      SP3_SRC: ${{ github.workspace }}/SofaPython3
 
     steps:
       - name: Setup PATH
@@ -26,6 +27,8 @@ jobs:
 
       - name: Checkout source code
         uses: actions/checkout@v2
+        with:
+          path: SofaPython3
 
       - name: Set up Python 3.7
         uses: actions/setup-python@v2
@@ -78,6 +81,7 @@ jobs:
           rm -rf temp
 
       - name: Build
+        shell: bash
         run: |
-          cmake -G "Visual Studio 16 2019" -A x64 .
-          make --build . --config Release
+          cmake -G "Visual Studio 16 2019" -A x64 -S $SP3_SRC -B "$SP3_SRC/build"
+          make --build "$SP3_SRC/build" --config Release
